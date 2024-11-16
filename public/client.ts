@@ -1,42 +1,10 @@
 import { io, Socket } from 'socket.io-client';
-import {JSDOM} from 'jsdom'
 const socket: Socket = io();  
 
 let username: string = '';
 let userList: string[] = [];
 
-const dom= new JSDOM(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>chat</title>
-</head>
-<body>
-   
-    <div class="page" id="loginPage">
-        <h1>Qual seu nome?</h1>
-        <input type="text" id="loginNameInput" placeholder="nome">
-    </div>
-    <div class="page" id="chatPage">
-        <div class="chatArea">
-            <ul class="chatList">
-                
-            </ul>
-            <ul class="userList">
-            </ul>
-        </div>
-        <div class="chatInput">
-            <input type="text" id="chatTextInput" placeholder="digite uma mensagem ">
-        </div>
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
-</body>
-</html>`)
 
-const document= dom.window.document
 
 const loginPage = document.getElementById('loginPage') as HTMLElement;
 const chatPage = document.getElementById('chatPage') as HTMLElement;
