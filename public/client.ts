@@ -1,9 +1,42 @@
 import { io, Socket } from 'socket.io-client';
-
-const socket: Socket = io();  // Aqui tipamos o socket como Socket
+import {JSDOM} from 'jsdom'
+const socket: Socket = io();  
 
 let username: string = '';
 let userList: string[] = [];
+
+const dom= new JSDOM(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>chat</title>
+</head>
+<body>
+   
+    <div class="page" id="loginPage">
+        <h1>Qual seu nome?</h1>
+        <input type="text" id="loginNameInput" placeholder="nome">
+    </div>
+    <div class="page" id="chatPage">
+        <div class="chatArea">
+            <ul class="chatList">
+                
+            </ul>
+            <ul class="userList">
+            </ul>
+        </div>
+        <div class="chatInput">
+            <input type="text" id="chatTextInput" placeholder="digite uma mensagem ">
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>`)
+
+const document= dom.window.document
 
 const loginPage = document.getElementById('loginPage') as HTMLElement;
 const chatPage = document.getElementById('chatPage') as HTMLElement;
@@ -15,7 +48,7 @@ console.log(loginInput)
 loginPage.style.display = 'flex';
 chatPage.style.display = 'none';
 
-// Função para renderizar a lista de usuários
+
 function renderUserList(): void {
     const ul = document.querySelector('.userList') as HTMLUListElement;
     ul.innerHTML = '';
@@ -25,7 +58,7 @@ function renderUserList(): void {
     });
 }
 
-// Função para adicionar mensagens ao chat
+
 function addMessage(type: 'status' | 'msg', user: string | null, msg: string): void {
     const ul = document.querySelector('.chatList') as HTMLUListElement;
 
@@ -45,7 +78,7 @@ function addMessage(type: 'status' | 'msg', user: string | null, msg: string): v
     ul.scrollTop = ul.scrollHeight;
 }
 
-// Evento para tratar o input do nome de usuário
+
 loginInput.addEventListener('keyup', (e: KeyboardEvent): void => {
     if (e.key === 'Enter') {
         const name = loginInput.value.trim();
@@ -57,7 +90,7 @@ loginInput.addEventListener('keyup', (e: KeyboardEvent): void => {
     }
 });
 
-// Evento para enviar mensagens no chat
+
 textInput.addEventListener('keyup', (e: KeyboardEvent): void => {
     if (e.key === 'Enter') {
         const txt = textInput.value.trim();
@@ -70,7 +103,7 @@ textInput.addEventListener('keyup', (e: KeyboardEvent): void => {
     }
 });
 
-// Evento quando o servidor confirma que o usuário entrou
+
 socket.on('user-ok', (list: string[]): void => {
     loginPage.style.display = 'none';
     chatPage.style.display = 'flex';
@@ -81,7 +114,7 @@ socket.on('user-ok', (list: string[]): void => {
     renderUserList();
 });
 
-// Evento para atualizar a lista de usuários
+
 socket.on('list-update', (data: { joined?: string, left?: string, list: string[] }): void => {
     if (data.joined) {
         addMessage('status', null, `${data.joined} entrou no chat.`);
@@ -95,24 +128,23 @@ socket.on('list-update', (data: { joined?: string, left?: string, list: string[]
     renderUserList();
 });
 
-// Evento para exibir novas mensagens
+
 socket.on('show-msg', (data: { username: string, message: string }): void => {
     addMessage('msg', data.username, data.message);
 });
 
-// Evento de desconexão do socket
+
 socket.on('disconnect', (): void => {
     addMessage('status', null, 'Você foi desconectado!');
     userList = [];
     renderUserList();
 });
 
-// Evento de erro de reconexão
+
 socket.on('reconnect_error', (): void => {
     addMessage('status', null, 'Tentando reconectar...');
 });
 
-// Evento quando reconectar com sucesso
 socket.on('reconnect', (): void => {
     addMessage('status', null, 'Reconectado!');
 
